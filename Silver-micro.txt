@@ -1,0 +1,503 @@
+suvm1 ---------
+
++Mettre à jour la liste des paquets:
+sudo apt update
+****************
++Installer Apache:
+sudo apt install apache2
+sudo systemctl status apache2
+
+
+****************
+Installer MySQL:
+sudo apt install mysql-server
+
+MySQL Server n'est pas disponible dans les dépôts officiels de Debian Bookworm, une autre solution consiste à utiliser MariaDB, une alternative open-source à MySQL qui est souvent disponible dans les dépôts Debian.
+
+Maria db: 
+
+sudo apt install mariadb-server
+
+Une fois l'installation terminée, vous pouvez démarrer le service MariaDB :
+
+sudo systemctl start mariadb
+
+configurer le service pour qu'il démarre automatiquement au démarrage du système :
+
+sudo systemctl enable mariadb
+
+connecter à votre base de données MariaDB en utilisant le client mysql :
+
+sudo mysql -u root -p
+
+***************
+
+Installer PHP:
+sudo apt install php libapache2-mod-php php-mysql
+  
+Pour tester php: 
+>ls
+>cd .. 
+>ls
+>cd var
+>ls
+>cd www
+>ls
+
+---    sudo nano /var/www/html/test.php
+---    <?php
+echo "PHP fonctionne correctement !";
+?>
+---   http://localhost/test1.php
+
+****************
+Redémarrer 
+sudo systemctl restart apache2
+***********************************************************************************
+vm2---------
+
+Installer Node.js et NPM:
+sudo apt install nodejs npm
+
+*****************
+Installer MongoDB:
+
+sudo apt-get install gnupg curl
+
+curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
+   sudo gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg \
+   --dearmor
+
+sudo apt-get update
+
+sudo apt-get install -y mongodb-org
+
+
+*****************
+Installer Express:
+npm install express
+
+******************
+Installer React 
+npx create-react-app mon-app-react
+cd mon-app-react
+npm start
+********************************************************************************
+
+Partie 2 :
+
+installation Docker: 
+
+Mettre à jour les paquets :
+Avant d'installer Docker, il est recommandé de mettre à jour les paquets du système :
+
+bash
+Copy code
+sudo apt update
+sudo apt upgrade
+Installer les dépendances :
+Pour permettre à APT de utiliser des dépôts HTTPS, installez les paquets suivants :
+
+bash
+Copy code
+sudo apt install apt-transport-https ca-certificates curl gnupg lsb-release
+Ajouter la clé GPG officielle de Docker :
+
+bash
+Copy code
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+Configurer le référentiel Docker :
+
+bash
+Copy code
+echo \
+  "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+Installer Docker Engine :
+Mettez à jour la liste des paquets disponibles et installez Docker Engine :
+
+bash
+Copy code
+sudo apt update
+sudo apt install docker-ce docker-ce-cli containerd.io
+Vérifier l'installation :
+Vérifiez que Docker Engine a bien été installé en exécutant la commande suivante :
+
+bash
+Copy code
+sudo docker --version
+Démarrer le service Docker :
+Démarrez le service Docker :
+
+bash
+Copy code
+sudo systemctl start docker
+Activer le démarrage automatique de Docker (optionnel) :
+Si vous souhaitez que Docker démarre automatiquement au démarrage du système, exécutez la commande suivante :
+
+bash
+Copy code
+sudo systemctl enable docker
+________
+Créer un conteneur PHP avec Apache :
+***********************************
+a. Créer un dossier pour le projet :
+
+mkdir docker-lamp
+cd docker-lamp
+
+b. Créer un fichier Dockerfile pour PHP avec Apache :
+touch Dockerfile-php-apache
+
+c. Ouvrir le fichier Dockerfile-php-apache dans un éditeur de texte et y ajouter les lignes suivantes :
+
+FROM php:apache
+
+COPY fizzbuzz.php /var/www/html/
+
+EXPOSE 80
+
+d. Construire l'image Docker :
+docker build -t php-apache 
+
+e. Exécuter le conteneur :
+
+docker run -d -p 8080:80 --name dockerconteneur dockerfile-php-apache
+
+Le conteneur a été démarré avec succès. L'ID du conteneur est: 
+09636cc2353aa80224e2653f0d8f4cb324b95e2125ebff4a7b3ca8fb4a1881ee
+
+Créer un conteneur MySQL :
+***********************************
+a. Créer un fichier Dockerfile pour MySQL :
+
+bash
+Copy code
+touch dockerfile-mysql
+b. Ouvrir le fichier Dockerfile-mysql dans un éditeur de texte et y ajouter les lignes suivantes :
+
+Dockerfile
+Copy code
+FROM mysql
+
+VOLUME /var/lib/mysql
+
+c. Construire l'image Docker :
+docker build -t mysql-server -f dockerfile-mysql .
+
+d. Exécuter le conteneur :
+docker run -d -v mysql-data:/var/lib/mysql --name mysql-container mysql-server
+
+Le conteneur a été démarré avec succès. L'ID du conteneur est: 
+8b53228210c6cfbc5d8f6f376d277a5255ede4d0cfbea7365bb15b0d5f45abdf
+
+
+
+
+Créer un conteneur PHPMyAdmin :
+******************************
+a. Créer un fichier Dockerfile pour PHPMyAdmin :
+touch Dockerfile-php
+
+b. Ouvrir le fichier Dockerfile-php dans un éditeur de texte et y ajouter les lignes suivantes :
+
+
+FROM phpmyadmin/phpmyadmin
+
+ENV PMA_HOST=mysql-container
+
+c. Construire l'image Docker :
+
+docker build -t phpmyadmin -f /home/nouhayla/dockerfile_php/dockerfile-php /home/nouhayla/dockerfile_php
+
+d. Exécuter le conteneur :
+docker run -d -p 8081:80 --name phpmyadmin-container phpmyadmin
+
+754ff7a71c0016dc693cb7a8fe6e5a76ea06d46cc53d67446427c8e4e19020c8
+
+
+Conteneurisation de la stack MERN:
+*********************************
+
+Créer un conteneur MongoDB :
+
+a. Créer un dossier pour le projet :
+
+
+ 
+mkdir docker-mern
+cd docker-mern
+b. Créer un fichier Dockerfile pour MongoDB :
+
+
+ 
+touch Dockerfile-mongodb
+c. Ouvrir le fichier Dockerfile-mongodb dans un éditeur de texte et on ajoute les lignes suivantes :
+
+
+ 
+FROM mongo
+VOLUME /data/db
+d. Construire l'image Docker :
+
+
+ 
+docker build -t mongo-server -f Dockerfile-mongodb .
+e. Exécuter le conteneur :
+
+
+ 
+docker run -d -v mongo-data:/data/db --name mongo-container mongo-server
+Créer un conteneur Node.js avec Express :
+
+a. Créer un fichier Dockerfile pour Node.js avec Express :
+
+
+ 
+touch Dockerfile-node
+b. Ouvrir le fichier Dockerfile-node dans un éditeur de texte et on ajoute les lignes suivantes :
+
+
+ 
+FROM node:14
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 3000
+
+CMD ["node", "server.js"]
+c. Construire l'image Docker :
+
+
+ 
+docker build -t node-express -f Dockerfile-node .
+d. Exécuter le conteneur :
+
+
+ 
+docker run -d -p 3000:3000 --name node-container node-express
+Créer un conteneur pour React :
+
+a. Créer un fichier Dockerfile pour React :
+
+
+ 
+touch Dockerfile-react
+b. Ouvrir le fichier Dockerfile-react dans un éditeur de texte et on ajoute les lignes suivantes :
+
+
+ 
+FROM node:14
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
+c. Construire l'image Docker :
+
+
+ 
+docker build -t react-app -f Dockerfile-react .
+d. Exécuter le conteneur :
+
+
+ 
+docker run -d -p 3001:3000 --DKFile react-container react-app
+
+
+Utilisation de Docker Compose:
+******************************
+
+
+Créer un dossier pour l'application :
+
+
+mkdir compose-lamp
+cd compose-lamp
+Créer un fichier docker-compose.yaml :
+
+yaml
+
+version: '3.1'
+
+services:
+  php:
+    image: php:apache
+    ports:
+      - "8080:80"
+    volumes:
+      - ./fizzbuzz.php:/var/www/html/index.php
+
+  mysql:
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: mysql
+    ports:
+      - "8081:80"
+
+volumes:
+  mysql-data:
+Exécuter Docker Compose :
+
+
+
+docker-compose up -d
+
+Application MERN avec Docker Compose:
+*************************************
+
+Créer un dossier pour l'application :
+
+
+mkdir compose-mern
+cd compose-mern
+
+
+Créer un fichier docker-compose.yaml :
+version: '3.1'
+
+services:
+  mongodb:
+    image: mongo
+    volumes:
+      - mongo-data:/data/db
+
+  node:
+    image: node:14
+    working_dir: /usr/src/app
+    volumes:
+      - .:/usr/src/app
+    command: npm start
+    ports:
+      - "3000:3000"
+
+  react:
+    image: node:14
+    working_dir: /usr/src/app
+    volumes:
+      - .:/usr/src/app
+    command: npm start
+    ports:
+      - "3001:3000"
+
+volumes:
+  mongo-data:
+
+Exécuter Docker Compose :
+
+
+docker-compose up -d
+
+Déployer des conteneurs avec Kubernetes:
+***************************************
+
+Créer un dossier pour la configuration :
+
+mkdir kube-lamp
+cd kube-lamp
+
+Créer les fichiers de configuration Kubernetes pour chaque service :
+
+php-deployment.yaml :
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-apache
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: php-apache
+  template:
+    metadata:
+      labels:
+        app: php-apache
+    spec:
+      containers:
+      - name: php-apache
+        image: php:apache
+        ports:
+        - containerPort: 80
+
+mysql-deployment.yaml :
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: example
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: mysql-data
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-data
+        persistentVolumeClaim:
+          claimName: mysql-pv-claim
+
+phpmyadmin-deployment.yaml:
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phpmyadmin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: phpmyadmin
+  template:
+    metadata:
+      labels:
+        app: phpmyadmin
+    spec:
+      containers:
+      - name: phpmyadmin
+        image: phpmyadmin/phpmyadmin
+        env:
+        - name: PMA_HOST
+          value: mysql
+        ports:
+        - containerPort: 80
+
+kubectl apply -f php-deployment.yaml
+kubectl apply -f mysql-deployment.yaml
+kubectl apply -f phpmyadmin-deployment.yaml
+
